@@ -5,23 +5,25 @@ from datetime import datetime, timedelta
 import time
 import argparse
 
-#sys.path.insert(1, '../../data_subscriber')
-# We should reuse the parser creation code from daac_data_subcriber module properly but just copying-pasting for now
-#from daac_data_subscriber import create_parser
-
 '''Example Usage:
 
-./gen_cron_daac_data_subscriber.py -c HLSL30 -s opera-dev-isl-fwd-pyoon -jc 10 -sd 2022-01-01T00:00:00Z -mult=10
+./gen_cron_daac_data_subscriber.py -c HLSL30 -s opera-dev-isl-fwd-pyoon -jc 10 -js 2022-01-01T00:00:00Z -mult=10
 
 '''
+
+_DEFAULT_JOB_DELAY = 3
 
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", help="Verbose mode.")
     parser.add_argument("-m", "--mode", dest="mode", type=str, required=True,
                              help="'full', 'query', or 'download' See daac_data_subscriber help for more info.")
-    parser.add_argument("-s", "--start-date", dest="start_date", default=False,
-                             help="The ISO date time after which data should be retrieved. For Example, --start-date 2021-01-14T00:00:00Z")
+    parser.add_argument("-ds", "--data-start-date", dest="data_start_date", default=False, required=True,
+                             help="The ISO date time after which data should be retrieved. For Example, -ds 2021-01-14T00:00:00Z")
+    parser.add_argument("-js", "--job-start-date", dest="job_start_date", default=None,
+                             help="The ISO date time at which the cronjobs should start. For Example, -js 2022-07-10T20:00:00Z")
+    parser.add_argument("-jd", "--job-delay-mins", dest="job_delay_mins", default=None,
+                             help="Number of minutes after which the cronjobs should start. For Example, -jd 7 will start the first cronjob 7 minutes after script execution")
     parser.add_argument("-jp", "--job-period", dest="job_period", type=int, default=60,
                              help="How often, in minutes, should the cron job run (default: 60 minutes).")
     parser.add_argument("-jc", "--job-count", dest="job_count", type=int, required=True,
@@ -36,9 +38,6 @@ def create_parser():
     return parser
 
 
-#TODO:
-# Carry over other optional parameters into the daac_data_subscriber code
-
 _python_and_subs = '/export/home/hysdsops/mozart/bin/python /export/home/hysdsops/mozart/ops/opera-pcm/data_subscriber/daac_data_subscriber.py'
 
 parser = create_parser()
@@ -47,8 +46,16 @@ args = parser.parse_args()
 date_format_str = "%Y-%m-%dT%H:%M:%SZ"
 increment_mins = args.job_period * args.multiplier
 
-start_dt = datetime.strptime(args.start_date, date_format_str)
-job_dt = datetime.now() + timedelta(minutes=2) # Put two minute delay in the cron start so that you have some time between generation and running. Could make this a parameter.
+start_dt = datetime.strptime(args.data_start_date, date_format_str)
+
+# We look for job start date first and then job delay. If neither options are present, use default delay in starting jobs 
+if args.job_start_date is not None:
+    job_dt = datetime.strptime(args.job_start_date, date_format_str)
+elif args.job_delay_mins is not None:
+    job_dt = datetime.now() + timedelta(minutes=int(args.job_delay_mins))
+else:
+    job_dt = datetime.now() + timedelta(minutes=_DEFAULT_JOB_DELAY)
+
 output_file_str = args.output_file
 for i in range(0, args.job_count): 
     start = start_dt + timedelta(minutes=i*increment_mins)
