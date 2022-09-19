@@ -12,6 +12,7 @@ import argparse
 '''
 
 _DEFAULT_JOB_DELAY = 3
+_source_profile = 'source /export/home/hysdsops/.bash_profile;'
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -63,7 +64,7 @@ for i in range(0, args.job_count):
     stop = start_dt + timedelta(minutes=(i+1)*increment_mins)
     stop_str = stop.strftime(date_format_str)
     cron = f"{job_dt.minute} {job_dt.hour} {job_dt.day} {job_dt.month} *"
-    print(f" {cron} (time {_python_and_subs} {args.mode} -s {start_str} -e {stop_str} {args.pass_through}) >> {output_file_str} 2>&1")
+    print(f" {cron} ({_source_profile} time  {_python_and_subs} {args.mode} -s {start_str} -e {stop_str} {args.pass_through}) >> {output_file_str} 2>&1")
 
     job_dt = job_dt + timedelta(minutes = args.job_period)
 
