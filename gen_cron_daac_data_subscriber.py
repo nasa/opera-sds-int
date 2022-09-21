@@ -12,6 +12,7 @@ import argparse
 '''
 
 _DEFAULT_JOB_DELAY = 3
+_source_profile = 'source /export/home/hysdsops/.bash_profile;'
 
 def create_parser():
     parser = argparse.ArgumentParser()
