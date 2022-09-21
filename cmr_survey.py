@@ -117,9 +117,9 @@ def create_parser():
     query_parser = subparsers.add_parser("query")
     query_parser.add_argument("-c", "--collection-shortname", dest="collection", required=True,
                               help="The collection shortname for which you want to retrieve data.")
-    query_parser.add_argument("-s", "--start-date", dest="startDate", default=False,
+    query_parser.add_argument("-s", "--start-date", dest="startDate", default=None,
                               help="The ISO date time after which data should be retrieved. For Example, --start-date 2021-01-14T00:00:00Z")
-    query_parser.add_argument("-e", "--end-date", dest="endDate", default=False,
+    query_parser.add_argument("-e", "--end-date", dest="endDate", default=None,
                               help="The ISO date time before which data should be retrieved. For Example, --end-date 2021-01-14T00:00:00Z")
     query_parser.add_argument("-b", "--bounds", dest="bbox", default="-180,-90,180,90",
                               help="The bounding rectangle to filter result in. Format is W Longitude,S Latitude,E Longitude,N Latitude without spaces. Due to an issue with parsing arguments, to use this command, please use the -b=\"-180,-90,180,90\" syntax when calling from the command line. Default: \"-180,-90,180,90\".")
@@ -274,7 +274,9 @@ def query_cmr(args, token, CMR) -> list:
         }
 
         temporal_range = get_temporal_range(start_str, end_str, now_date)
-        params['temporal'] = temporal_range
+        #params['temporal'] = '2022-01-01T00:00:00Z,2023-01-01T01:00:00Z'
+        #params['temporal'] = temporal_range
+        params['revision_date'] = temporal_range
 
         product_granules, search_after = request_search(request_url, params)
 
