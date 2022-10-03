@@ -274,9 +274,11 @@ def query_cmr(args, token, CMR) -> list:
         }
 
         temporal_range = get_temporal_range(start_str, end_str, now_date)
-        #params['temporal'] = '2022-01-01T00:00:00Z,2023-01-01T01:00:00Z'
+        #params['temporal'] = '2022-01-01T00:00:00Z,2023-01-01T00:00:00Z'
         #params['temporal'] = temporal_range
         params['revision_date'] = temporal_range
+
+        #print(params)
 
         product_granules, search_after = request_search(request_url, params)
 
