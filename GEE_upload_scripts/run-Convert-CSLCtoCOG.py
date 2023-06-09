@@ -55,7 +55,7 @@ def processCSLC(s3key,gcskey):
     upload_blob(gcsbucket,outfile,gcskey)
     shutil.rmtree(f'./temp_{filename}/')
 
-def run_rtc_transfer(keydict):
+def run_cslc_transfer(keydict):
     try:
         start_time = time.time()
         s3key = keydict['s3key']
@@ -98,5 +98,5 @@ if __name__ == '__main__':
     print(f'{len(keyPairs)} key pairs identified')
 
     pool = mp.Pool(4)
-    pool.map(run_rtc_transfer,keyPairs)
+    pool.map(run_cslc_transfer,keyPairs)
     pool.close()
