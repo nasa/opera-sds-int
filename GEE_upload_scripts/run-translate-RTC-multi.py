@@ -88,15 +88,15 @@ if __name__ == '__main__':
         gcsKeys.append(blob.name.split('.tif')[0][:-2]+'.tif')
     print(f'{len(gcsKeys)} existing gcs keys found')
 
-    #keyPairs = []
-    #for key in keyList:
-    #    fname = key.split('/')[-1]
-    #    gcsKey = gcs_prefix+fname
-    #    if gcsKey not in gcsKeys:
-    #        keydict = {'s3key':key,'gcsKey':gcsKey}
-    #        keyPairs.append(keydict)
-    #print(f'{len(keyPairs)} key pairs identified')
-    #pool = mp.Pool(mp.cpu_count())
-    #run_rtc_transfer(keyPairs[0])
-    #pool.map(run_rtc_transfer,keyPairs)
-    #pool.close()
+    keyPairs = []
+    for key in keyList:
+        fname = key.split('/')[-1]
+        gcsKey = gcs_prefix+fname
+        if gcsKey not in gcsKeys:
+            keydict = {'s3key':key,'gcsKey':gcsKey}
+            keyPairs.append(keydict)
+    print(f'{len(keyPairs)} key pairs identified')
+    pool = mp.Pool(mp.cpu_count())
+    run_rtc_transfer(keyPairs[0])
+    pool.map(run_rtc_transfer,keyPairs)
+    pool.close()
