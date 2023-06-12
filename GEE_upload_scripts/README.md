@@ -48,6 +48,7 @@
 This guide provides a quick way to get started with our project. Please see our [docs]([INSERT LINK TO DOCS SITE / WIKI HERE]) for a more comprehensive overview.
 
 ### ${\color{lightblue}Initial \space instruction \space from \space PST}$
+(this section will likely be removed eventually)
 
 Some things to note about the scripts:
 * The main script first finds all sub directories within a specified s3 bucket+prefix. Then, it makes a list of s3 keys that point to the target layer geotifs (e.g. the VH backscatter). It then searches the Google Cloud Storage (GCS) bucket+prefix for cogs that have already been transferred. It compares these lists and creates a list of s3-gcs key pairs that still need to be transferred. Once we have this big list, we iterate through it using multiprocessing and for each pair, download the geotiff (or h5 for cslc), build a GDAL_translate command to translate into a COG of the right format for GEE, and upload to GCS.
@@ -84,7 +85,10 @@ Further Questions & Answers:
 
 ### Setup Instructions
 
-1. [INSERT STEP-BY-STEP SETUP INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+1. Ensure you know how to authenticate the Google Command Line Tools for the script to upload to the Google Cloud Bucket.
+2. Identify the correct `s3_prefix` and `gcs_prefix`, and set to the correct values in the script (they're currently hard-coded).
+3. Review the Initial Instruction from PST section above, to help understand the script and what to expect when it runs.
+4. Try running the script.  I expect there will be some trouble-shooting involved.  When running the script, keep notes about what else needs to be done to get it working, including changes to the script code itself.
    
 <!-- ☝️ Replace with a numbered list of how to set up your software prior to running ☝️ -->
 
