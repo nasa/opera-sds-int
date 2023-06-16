@@ -8,6 +8,7 @@ import time
 from botocore import UNSIGNED
 from botocore.client import Config
 import multiprocessing as mp
+from functools import partial
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     storage_client = storage.Client()
@@ -50,7 +51,7 @@ def processCSLC(bucket, s3key,gcskey):
     upload_blob(gcsbucket,outfile,gcskey)
     shutil.rmtree(f'./temp_{filename}/')
 
-def run_rtc_transfer(bucket, keydict):
+def run_rtc_transfer(keydict, bucket):
     try:
         start_time = time.time()
         s3key = keydict['s3key']
@@ -66,12 +67,14 @@ def h5_to_key(path):
 def tif_to_key(path):
     return path.split('.tif')[0][:-2]+'.tif'
 
-def find_s3_keys(s3, s3_prefix, path_to_key):
+def find_s3_keys(s3, bucket, s3_prefix, path_to_key):
     paginator = s3.get_paginator('list_objects_v2')
-    pages = paginator.paginate(Bucket=s3_bucket, Prefix=s3_prefix, Delimiter='/')
+    pages = paginator.paginate(Bucket=bucket, Prefix=s3_prefix, Delimiter='/')
     keyList = []
     for page in pages:
         #pprint(page)
+        if 'CommonPrefixes' not in page:
+            continue
         for obj in page['CommonPrefixes']:
             path = obj.get('Prefix')
             fname = path_to_key(path)
@@ -87,10 +90,10 @@ if __name__ == '__main__':
     #gcs_prefix = 'products/2023-05-04_globalrun_2021-04-11_to_2021-04-22_VV/'
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
 
-    keyList = find_s3_keys(s3, s3_prefix, h5_to_key)
+    keyList = find_s3_keys(s3, bucket, s3_prefix, h5_to_key)
     print(f'{len(keyList)} source s3 keys found')
 
-    dest_keys = find_s3_keys(s3, dest_prefix, tif_to_key)
+    dest_keys = find_s3_keys(s3, bucket, dest_prefix, tif_to_key)
     print(f'{len(dest_keys)} destination s3 keys found')
 
     '''storage_client = storage.Client()
@@ -110,5 +113,5 @@ if __name__ == '__main__':
     print(f'{len(keyPairs)} key pairs identified')
 
     pool = mp.Pool(4)
-    pool.map(run_rtc_transfer, bucket, keyPairs)
+    pool.map(partial(run_rtc_transfer, bucket=bucket), keyPairs)
     pool.close()
