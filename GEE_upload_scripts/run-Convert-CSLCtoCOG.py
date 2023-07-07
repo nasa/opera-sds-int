@@ -28,7 +28,7 @@ def processCSLC(s3key,gcskey):
     #Download CSLC file
     #print('Downloading CSLC File')
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    bucket = 'opera-pst-rs-pop1'
+    bucket = 'opera-int-rs-fwd' #'opera-pst-rs-pop1'
     filename = s3key.split('/')[-1]
     filepath = f'./temp_{filename}/'+filename
     s3.download_file(bucket, s3key, filepath)
@@ -37,14 +37,14 @@ def processCSLC(s3key,gcskey):
     #print('Converting amplitude to COG')
     outfile = f'./temp_{filename}/cog.tif'
     f = h5py.File(filepath, 'r')
-    pass_direction = f['science']['SENTINEL1']['identification']['orbit_pass_direction'][()]
+    pass_direction = f['identification']['orbit_pass_direction'][()]
     if pass_direction == b'Ascending':
         pass_d = 'A'
     elif pass_direction == b'Descending':
         pass_d = 'D'
     else:
         pass_d = 'N'
-    cslc_h5_amp = f'DERIVED_SUBDATASET:AMPLITUDE:NETCDF:"{filepath}":/science/SENTINEL1/CSLC/grids/VV'
+    cslc_h5_amp = f'DERIVED_SUBDATASET:AMPLITUDE:NETCDF:"{filepath}":/data/VV'
     gdal_cmd = f'gdal_translate -of COG -co COMPRESS=DEFLATE -co RESAMPLING=AVERAGE {cslc_h5_amp} {outfile}'
     subprocess.run(gdal_cmd,shell=True,stdout=subprocess.DEVNULL)
 
@@ -53,7 +53,7 @@ def processCSLC(s3key,gcskey):
     gcsbucket = "opera-bucket-cslc"
     gcskey = gcskey.split('.tif')[0] + f'_{pass_d}.tif'
     upload_blob(gcsbucket,outfile,gcskey)
-    shutil.rmtree(f'./temp_{filename}/')
+    shutil.rmtree(f'temp_{filename}')
 
 def run_rtc_transfer(keydict):
     try:
@@ -67,11 +67,11 @@ def run_rtc_transfer(keydict):
 
 if __name__ == '__main__':
     os.environ["GCLOUD_PROJECT"] = "opera-one"
-    s3_prefix = 'products/int_fwd_r2/2023-05-04_globalrun_2021-04-11_to_2021-04-22/CSLC_S1/'
-    gcs_prefix = 'products/2023-05-04_globalrun_2021-04-11_to_2021-04-22_VV/'
+    s3_prefix = 'products/CSLC_S1/' #'products/int_fwd_r2/2023-05-04_globalrun_2021-04-11_to_2021-04-22/CSLC_S1/'
+    gcs_prefix = 'products/2023-06-26_historcal_2021-04-01_to_2021-04-19/'
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     paginator = s3.get_paginator('list_objects_v2')
-    pages = paginator.paginate(Bucket='opera-pst-rs-pop1', Prefix=s3_prefix, Delimiter='/')
+    pages = paginator.paginate(Bucket='opera-int-rs-fwd', Prefix=s3_prefix, Delimiter='/')
     keyList = []
     for page in pages:
         #pprint(page)
