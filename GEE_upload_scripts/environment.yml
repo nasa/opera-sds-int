@@ -1,0 +1,21 @@
+name: opera-gee
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - boto3
+  - earthengine-api=0.1.353
+  - fsspec
+  - gdal
+  - geopandas
+  - google-cloud-storage=2.6.0
+  - h5py=3.7.0
+  - ipykernel=6.15.0
+  - ipython
+  - pip
+  - python=3.11.3
+  - rasterio
+  - requests=2.29.0
+  - rioxarray
+  - s3fs
+  - shapely=2.0.1
