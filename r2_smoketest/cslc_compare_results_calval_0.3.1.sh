@@ -37,8 +37,10 @@ for burst_id in "${burst_ids[@]}"; do
   burst_id_replace_underscores=${burst_id_uppercase//_/-}
   burst_id_pattern="*_${burst_id_replace_underscores}_*"
   
-  output_file=$(ls ./output_s1_cslc/${burst_id_pattern}/*.h5)
+  output_file=$(ls ./output_dir_cslc/${burst_id_pattern}/*.h5)
   expected_file=$(ls ./deployment_smoke_test_cslc_s1_calval_0.3.1/expected_output_data/${burst_id_pattern}/*.h5)
-    
+
+  echo "expected_file: ${expected_file}"
+  echo "output_file: ${output_file}"
   python3 validate_cslc_product_calval_0.3.1.py -r ${expected_file} -s ${output_file} -p CSLC
 done

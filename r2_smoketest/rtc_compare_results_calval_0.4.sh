@@ -35,10 +35,12 @@ for burst_id in "${burst_ids[@]}"; do
   
   burst_id_uppercase=${burst_id^^}
   burst_id_replace_underscores=${burst_id_uppercase//_/-}
-  burst_id_pattern="*_${burst_id_replace_underscores}_*.h5"
+  burst_id_pattern="*_${burst_id_replace_underscores}_*"
   
-  output_file=$(ls ./output_dir/${burst_id_pattern}/*.h5)
+  output_file=$(ls ./output_dir_rtc/${burst_id_pattern}/*.h5)
   expected_file=$(ls ./deployment_smoke_test_rtc_s1_calval_0.4/expected_output_data/${burst_id_pattern}/*.h5)
 
+  echo "expected_file: ${expected_file}"
+  echo "output_file: ${output_file}"
   python3 rtc_compare_calval_0.4.py ${expected_file} ${output_file}
 done
