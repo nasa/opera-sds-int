@@ -42,5 +42,5 @@ for burst_id in "${burst_ids[@]}"; do
 
   echo "expected_file: ${expected_file}"
   echo "output_file: ${output_file}"
-  python3 validate_cslc_product_calval_0.3.1.py -r ${expected_file} -s ${output_file} -p CSLC
+  python3 validate_cslc_product_calval.py -r ${expected_file} -s ${output_file} -p CSLC
 done

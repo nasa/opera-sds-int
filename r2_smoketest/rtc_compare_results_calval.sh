@@ -42,5 +42,5 @@ for burst_id in "${burst_ids[@]}"; do
 
   echo "expected_file: ${expected_file}"
   echo "output_file: ${output_file}"
-  python3 rtc_compare_calval_0.4.py ${expected_file} ${output_file}
+  python3 rtc_compare_calval.py ${expected_file} ${output_file}
 done

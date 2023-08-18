@@ -20,5 +20,5 @@ aws s3 cp s3://opera-int-rs-fwd/products/CSLC_S1/ $(pwd) --recursive --exclude "
 cd ..
 
 # Run comparisons
-rtc_compare_results_calval_0.4.sh | grep FAIL
-cslc_compare_results_calval_0.3.1.sh | grep failed
+rtc_compare_results_calval.sh | grep FAIL
+cslc_compare_results_calval.sh | grep failed
