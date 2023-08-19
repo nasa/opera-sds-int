@@ -34,14 +34,14 @@ unzip deployment_smoke_test_cslc_s1_calval_${cslc_v}.zip
 mkdir output_dir_rtc output_dir_cslc
 
 # TODO: poll for all rtc products here
-# aws s3 ls s3://${s3_rs}/products/RTC_S1/ --recursive
+# aws s3 ls s3://${s3_rs}/products/RTC_S1/ --recursive | grep OPERA_L2_RTC-S1_T064.*h5$ | wc -l
 # loop and poll every minute for ALL files to exist
 
 cd output_dir_rtc
 aws s3 cp s3://${s3_rs}/products/RTC_S1/ $(pwd) --recursive --exclude "OPERA*_static_layers" --include "OPERA_L2_RTC-S1_T064*"
 
 # TODO: poll for all cslc products here
-# aws s3 ls s3://${s3_rs}/products/CSLC_S1/ --recursive
+# aws s3 ls s3://${s3_rs}/products/CSLC_S1/ --recursive | grep OPERA_L2_CSLC-S1A_IW_.*h5$ | wc -l
 # loop and poll every minute for ALL files to exist
 
 cd ../output_dir_cslc
