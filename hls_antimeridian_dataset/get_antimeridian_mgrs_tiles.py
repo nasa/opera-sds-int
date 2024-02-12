@@ -38,6 +38,8 @@ tree = et.parse('./S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_210
 
 name_prefixes = ('01', '60', '59', '02', '58', '03')
 
+ns = {'kml': 'http://www.opengis.net/kml/2.2', 'gx': "http://www.google.com/kml/ext/2.2", 'kml2': "http://www.opengis.net/kml/2.2", 'atom': "http://www.w3.org/2005/Atom"}
+
 name_list = []
 bbox_list = []
 for name in tree.xpath("/kml:kml/kml:Document/kml:Folder/kml:Placemark/kml:name", namespaces=ns):
