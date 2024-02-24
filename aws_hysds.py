@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
-# This script is used to start or stop EC2 instances and set the min, max, or desired capacity of Auto-Scaling Groups in a hySDS cluster
-# Will also add support for EventBridge
+# This script is used to perform common AWS operations in a hySDS cluster:
+# 1. View status of and start/stop EC2 instances
+# 2. View and set the min, max, or desired capacity of Auto-Scaling Groups
+# 3. View status of and enable/disable EventBridge
+
 import argparse
 import boto3
 
@@ -25,6 +28,30 @@ def take_ec2_action(ec2_name, action):
     else:
         print("Instance state:", ec2_name, instance_map[ec2_name]['State'])
 
+def get_unique_resources(resource_map, prefix, sub_name):
+    # Build up all the Auto-Scaling Group names that match the prefix and sub_name but have to do two passes
+    absolute_asg_names = []
+    for key in resource_map:
+        if key.startswith(prefix) and key.find(sub_name) != -1:
+            absolute_asg_names.append(key)
+
+    # but if sub_name is exactly the string that the auto-scaling group ends with, then only that auto-scaling group is used
+    # This is necessary because we have asg names that's like data_download and data_download_hist
+    # But we have to be careful and not think that just "d" is a unique sub_name
+    unique_absolute_asg_names = []
+    for key in absolute_asg_names:
+        if key[-len(sub_name):] == sub_name:
+            if len(unique_absolute_asg_names) == 0:
+                unique_absolute_asg_names = [key]
+            else:
+                unique_absolute_asg_names = absolute_asg_names
+                break
+
+    if unique_absolute_asg_names == []:
+        unique_absolute_asg_names = absolute_asg_names
+
+    return unique_absolute_asg_names
+
 # Get two parameters from the command line using ArgumentParser: prefix and name
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(dest="subparser_name", required=True)
@@ -38,6 +65,11 @@ add_prefix(asg_parser)
 asg_parser.add_argument("sub_name", help="Partial string of the Auto-Scaling Group name without the prefix", nargs='?', default="")
 asg_parser.add_argument("action", help="Set min, max, or desired capacity", choices=["set_min", "set_max", "set_desired"], nargs='?')
 asg_parser.add_argument("value", help="The value to set the capacity to", nargs='?')
+
+eb_parser = subparsers.add_parser("eventbridge", help="EventBridge Operations (Lambda timer triggers)")
+add_prefix(eb_parser)
+eb_parser.add_argument("sub_name", help="Partial string of the EventBridge name without the prefix", nargs='?', default="")
+eb_parser.add_argument("action", help="Enable or disable the EventBridge trigger and therefore the lambda", choices=["enable", "disable"], nargs='?')
 
 args = parser.parse_args()
 
@@ -97,26 +129,7 @@ elif args.subparser_name == "asg":
             asg_state["Instances"] = group["Instances"]
             asg_map[group["AutoScalingGroupName"]] = asg_state
 
-    # Build up all the Auto-Scaling Group names that match the prefix and sub_name but have to do two passes
-    absolute_asg_names = []
-    for key in asg_map:
-        if key.startswith(args.prefix) and key.find(args.sub_name) != -1:
-            absolute_asg_names.append(key)
-
-    # but if sub_name is exactly the string that the auto-scaling group ends with, then only that auto-scaling group is used
-    # This is necessary because we have asg names that's like data_download and data_download_hist
-    # But we have to be careful and not think that just "d" is a unique sub_name
-    unique_absolute_asg_names = []
-    for key in absolute_asg_names:
-        if key[-len(args.sub_name):] == args.sub_name:
-            if len(unique_absolute_asg_names) == 0:
-                unique_absolute_asg_names = [key]
-            else:
-                unique_absolute_asg_names = absolute_asg_names
-                break
-
-    if unique_absolute_asg_names == []:
-        unique_absolute_asg_names = absolute_asg_names
+    unique_absolute_asg_names = get_unique_resources(asg_map, args.prefix, args.sub_name)
 
     if args.action in ["set_min", "set_max", "set_desired"]:
         if len(unique_absolute_asg_names) != 1:
@@ -124,15 +137,15 @@ elif args.subparser_name == "asg":
         else:
             if args.action == "set_min":
                 print("Setting min size for Auto-Scaling Group")
-                print(asg_client.update_auto_scaling_group(AutoScalingGroupName=absolute_asg_names[0], MinSize=int(args.value)))
+                print(asg_client.update_auto_scaling_group(AutoScalingGroupName=unique_absolute_asg_names[0], MinSize=int(args.value)))
 
             if args.action == "set_max":
                 print("Setting max size for Auto-Scaling Group")
-                print(asg_client.update_auto_scaling_group(AutoScalingGroupName=absolute_asg_names[0], MaxSize=int(args.value)))
+                print(asg_client.update_auto_scaling_group(AutoScalingGroupName=unique_absolute_asg_names[0], MaxSize=int(args.value)))
 
             if args.action == "set_desired":
                 print("Setting desired size for Auto-Scaling Group")
-                print(asg_client.update_auto_scaling_group(AutoScalingGroupName=absolute_asg_names[0], DesiredCapacity=int(args.value)))
+                print(asg_client.update_auto_scaling_group(AutoScalingGroupName=unique_absolute_asg_names[0], DesiredCapacity=int(args.value)))
     else:
         # Print out the auto-scaling groups
         print("AutoScalingingGroupName".ljust(70), "MinSize".ljust(15), "MaxSize".ljust(15), "DesiredCapacity".ljust(15), "Instances")
@@ -140,3 +153,38 @@ elif args.subparser_name == "asg":
             a = asg_map[key]
             print(a["AutoScalingGroupName"].ljust(75), str(a["MinSize"]).ljust(15), str(a["MaxSize"]).ljust(15), str(a["DesiredCapacity"]).ljust(15), len(a["Instances"]))
 
+
+elif args.subparser_name == "eventbridge":
+    # Get all EventBridge rules
+    eb_client = boto3.client('events')
+    paginator = eb_client.get_paginator('list_rules')
+    eb_list = paginator.paginate()
+
+    # Parse out eventbridge rules
+    eb_map = {}
+    for response in eb_list:
+        for rule in response["Rules"]:
+            eb_state = {}
+            eb_state["Name"] = rule["Name"]
+            eb_state["State"] = rule["State"]
+            eb_map[rule["Name"]] = eb_state
+
+    unique_absolute_eb_names = get_unique_resources(eb_map, args.prefix, args.sub_name)
+
+    if args.action in ["enable", "disable"]:
+        if len(unique_absolute_eb_names) != 1:
+            print_non_unique_message("EventBridge", unique_absolute_eb_names)
+        else:
+            if args.action == "enable":
+                print("Enabling EventBridge rule")
+                print(eb_client.enable_rule(Name=unique_absolute_eb_names[0]))
+
+            if args.action == "disable":
+                print("Disabling EventBridge rule")
+                print(eb_client.disable_rule(Name=unique_absolute_eb_names[0]))
+    else:
+        # Print out the eventbridge rules
+        print("EventBridge Rule".ljust(70), "State")
+        for key in unique_absolute_eb_names:
+            e = eb_map[key]
+            print(e["Name"].ljust(75), e["State"])
