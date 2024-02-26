@@ -8,6 +8,9 @@
 import argparse
 import boto3
 
+_LJ_M = 70
+_LJ_F = 10
+
 def add_prefix(parser):
     parser.add_argument("prefix", help="The prefix of the AWS resource name, e.g. opera-int-fwd, opera-pyoon-1")
     return parser
@@ -148,10 +151,11 @@ elif args.subparser_name == "asg":
                 print(asg_client.update_auto_scaling_group(AutoScalingGroupName=unique_absolute_asg_names[0], DesiredCapacity=int(args.value)))
     else:
         # Print out the auto-scaling groups
-        print("AutoScalingingGroupName".ljust(70), "MinSize".ljust(15), "MaxSize".ljust(15), "DesiredCapacity".ljust(15), "Instances")
+        print("AutoScalingingGroupName".ljust(_LJ_M), "MinSize".ljust(_LJ_F), "MaxSize".ljust(_LJ_F), "Desired".ljust(_LJ_F), "Instances")
         for key in unique_absolute_asg_names:
             a = asg_map[key]
-            print(a["AutoScalingGroupName"].ljust(75), str(a["MinSize"]).ljust(15), str(a["MaxSize"]).ljust(15), str(a["DesiredCapacity"]).ljust(15), len(a["Instances"]))
+            print(a["AutoScalingGroupName"].ljust(_LJ_M), str(a["MinSize"]).ljust(_LJ_F), str(a["MaxSize"]).ljust(_LJ_F),
+                  str(a["DesiredCapacity"]).ljust(_LJ_F), len(a["Instances"]))
 
 
 elif args.subparser_name == "eventbridge":
@@ -184,7 +188,7 @@ elif args.subparser_name == "eventbridge":
                 print(eb_client.disable_rule(Name=unique_absolute_eb_names[0]))
     else:
         # Print out the eventbridge rules
-        print("EventBridge Rule".ljust(70), "State")
+        print("EventBridge Rule".ljust(_LJ_M), "State")
         for key in unique_absolute_eb_names:
             e = eb_map[key]
-            print(e["Name"].ljust(75), e["State"])
+            print(e["Name"].ljust(_LJ_M), e["State"])
