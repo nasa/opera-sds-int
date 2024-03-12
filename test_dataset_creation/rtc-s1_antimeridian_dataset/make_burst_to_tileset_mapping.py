@@ -62,24 +62,6 @@ def map_bursts_to_tilesets(rtc_burst_list_filename, land_flag):
 
     df = get_mgrs_burst_db_from_sqlite_file('/Users/Sjlewis/proj/src-git/opera/dswx_s1_burst_db_data/MGRS_tile_collection_v0.3.sqlite', land_flag)
 
-    #burst_array = np.array(df.bursts)
-
-    #burst_list = []
-    #for b in burst_array:
-    #    burst_list.append(ast.literal_eval(b))
-
-    #burst_list = np.array(flatten(burst_list))
-
-    #burst_list_unique = np.unique(burst_list)
-    # this results in a numpy array with a list of unique burst IDs (list/array of text)
-
-
-    #mgrs_set_ids = np.empty(burst_list_unique.shape)
-
-    # this will take a while
-    #for b, s in zip(burst_list_unique, mgrs_set_ids):
-    #    s = list(df['mgrs_set_id'][df['bursts'].str.contains(b)])
-
     bursts_from_query = get_bursts_from_query(rtc_burst_list_filename)
 
     # This will take a while
@@ -89,14 +71,9 @@ def map_bursts_to_tilesets(rtc_burst_list_filename, land_flag):
     tilesets_unique = np.unique(flatten(tilesets))
 
     #print(df['mgrs_set_id'][tilesets_unique])
-    # Here's what will get printed out for the antimeridian case
+    # Here's what will get printed out for the antimeridian case, for the land+water case
     #['MS_1_58','MS_1_59','MS_1_60','MS_1_61','MS_30_65','MS_30_66','MS_66_40','MS_66_41','MS_66_171','MS_66_172','MS_81_29','MS_81_30','MS_146_103','MS_146_104','MS_146_105']
-    # New ones:  'MS_66_39', 'MS_66_170', 
-
-    #tilesets_unique_land = tilesets_unique[df['land_ocean_flag'][tilesets_unique] != 'water']
-    #print(df['mgrs_set_id'][tilesets_unique_land])
-    # Here's what will get printed out for the antimeridian case (using data through 2024-03-11):
-    # MS_1_58, MS_66_39, MS_66_40, MS_66_171, MS_66_172, MS_146_103, MS_146,104
+    # New ones (when including data through 2024-03-11):  'MS_66_39', 'MS_66_170', 
     
     indices_with_unique_tiles = np.array([len(a)==1 for a in tilesets])
 
@@ -115,14 +92,10 @@ def map_bursts_to_tilesets(rtc_burst_list_filename, land_flag):
     ##np.unique([b.split('_')[4].split('T')[0] for b in bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == tilesets_unique[0]]])
 
     #dates, inds = np.unique([b.split('_')[4].split('T')[0] for b in bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == tilesets_unique[0]]], return_index=True)
-
     #print(bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == tilesets_unique[0]][inds])
 
-
     for t in np.unique(tilesets_for_bursts_with_unique_tiles):
-        #np.unique([b.split('_')[4].split('T')[0] for b in bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == t]])
         dates, inds = np.unique([b.split('_')[4].split('T')[0] for b in bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == t]], return_index=True)
-        #dates, inds = np.unique([b.split('_')[4].split('T')[0] for b in bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == tilesets_unique[0]]], return_index=True)
         print(bursts_antimeridian_with_unique_tiles[tilesets_for_bursts_with_unique_tiles == t][inds])
 
         pass
