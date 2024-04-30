@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Arguments: DSWx-S1 version, DISP-S1 version, S3 R3 location, release
-# for example: final_0.5.2 final_1.0.1 opera-int-rs-fwd 2.0.0
+# for example: gamma_0.3 DISP_S1_Version opera-int-rs-fwd 3.0.0-rc.4.0
 
 set -e
 umask 002
