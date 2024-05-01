@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Arguments: DSWx-S1 version, DISP-S1 version, S3 R3 location, release
-# for example: gamma_0.3 DISP_S1_Version opera-int-rs-fwd 3.0.0-rc.4.0
+# Arguments: DSWx-S1 version, DISP-S1 version, S3 R3 location
+# for example: gamma_0.3 DISP_S1_Version opera-int-rs-fwd
 
 set -e
 umask 002
@@ -11,10 +11,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 dswx_s1_v=$1
 disp_s1_v=$2
 s3_rs=$3
-release=$4
 
 # Submit query job
-python3 ~/mozart/ops/opera-pcm/data_subscriber/daac_data_subscriber.py query -c OPERA_L2_RTC-S1_V1 --endpoint=OPS --release-version=${release} --job-queue=opera-job_worker-rtc_data_download --chunk-size=1 --transfer-protocol=auto --native-id=OPERA_L2_RTC-S1_T114-243001-IW3_20231213T121156Z_20231213T190239Z_S1A_30_v1.0*
+python3 ~/mozart/ops/opera-pcm/data_subscriber/daac_data_subscriber.py query -c OPERA_L2_RTC-S1_V1 --endpoint=OPS --job-queue=opera-job_worker-rtc_data_download --chunk-size=1 --transfer-protocol=auto --native-id=OPERA_L2_RTC-S1_T114-243001-IW3_20231213T121156Z_20231213T190239Z_S1A_30_v1.0*
 # TODO submit DISP-S1 job
 
 # Download and unzip gold files.
