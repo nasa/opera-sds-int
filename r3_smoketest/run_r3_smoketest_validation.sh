@@ -49,6 +49,9 @@ echo "Comparing DSWx-S1 products against gold files"
 expected=($(find ./deployment_smoke_test_dswx_s1_${dswx_s1_v} -maxdepth 1 -mindepth 1 -type d -printf "%f\n"))
 output=($(find ./output_dir_dswx -maxdepth 1 -mindepth 1 -type d -printf "%f\n"))
 
+IFS=$'\n' expected=($(sort <<<"${expected[*]}")); unset IFS
+IFS=$'\n' output=($(sort <<<"${output[*]}")); unset IFS
+
 # Point GDAL to the proj.db file it wants to load, this path assumes the script is being run on mozart
 export PROJ_LIB=/export/home/hysdsops/conda/share/proj
 
