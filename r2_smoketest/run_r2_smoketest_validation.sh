@@ -23,7 +23,7 @@ echo "Sleeping 1 hr initially for the SCIFLO PGE jobs to complete..."
 sleep 3600
 
 # Download output files
-mkdir output_dir_rtc output_dir_cslc
+mkdir -p output_dir_rtc output_dir_cslc
 
 # Poll for 28 rtc products. RTC PGE runs faster than CSLC so we poll and copy these first.
 while [ 28 -ne `aws s3 ls s3://${s3_rs}/products/RTC_S1/ --recursive | grep "OPERA_L2_RTC-S1_T064.*h5$" | wc -l` ]

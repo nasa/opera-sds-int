@@ -25,7 +25,7 @@ echo "Sleeping 60 min initially for the SCIFLO PGE jobs to complete..."
 sleep 3600
 
 # Download output files
-mkdir output_dir_dswx output_dir_disp
+mkdir -p output_dir_dswx output_dir_disp
 
 # Poll for 17 DSWx-S1 products. DSWx-S1 PGE runs faster than DISP-S1 so we poll and copy these first.
 while [ 17 -ne `aws s3 ls s3://${s3_rs}/products/DSWx_S1/ | grep "OPERA_L3_DSWx-S1_T4.*$" | wc -l` ]
