@@ -1,0 +1,3 @@
+{"preference":"results"}
+{"query":{"bool":{"must":[{"bool":{"must":[{"term":{"dataset.keyword":"L3_DIST_S1"}},{"term":{"dataset_type.keyword":"L3_DIST_S1"}}]}}]}},"size":0,"aggs":{"dataset_type.keyword":{"terms":{"field":"dataset_type.keyword","size":1000,"order":{"_count":"desc"}}}},"_source":{"includes":["id","starttime","endtime","location","center","urls","browse_urls","datasets","metadata.state","metadata.platform","metadata.sensoroperationalmode","metadata.polarisationmode","metadata.user_tags","metadata.exists_in_object_store","@timestamp","dataset"],"excludes":[]},"from":0,"sort":[{"@timestamp":{"order":"desc"}}]}
+

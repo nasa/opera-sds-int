@@ -1,0 +1,4 @@
+mod dist-s1
+
+# Run all tests
+all: dist-s1::e2e-with-product-id-time::e2e-with-product-id-time
