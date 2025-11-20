@@ -3,11 +3,11 @@
 
 <div align="center">
 
-<h1 align="center">OPERA DIST-S1 Test Automation</h1>
+<h1 align="center">OPERA VNV Test Automation Framework</h1>
 
 </div>
 
-<pre align="center">End-to-end testing framework for NASA OPERA DIST-S1 satellite displacement products pipeline</pre>
+<pre align="center">Comprehensive end-to-end testing framework for NASA OPERA satellite data product pipelines</pre>
 
 <!-- Header block for project -->
 
@@ -15,7 +15,10 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-Automated-green.svg)](dist-s1/)
 
-This repository contains a comprehensive test automation suite for **OPERA DIST-S1** (Observational Products for End-Users from Remote Sensing Analysis - Displacement products from Sentinel-1 data). The framework orchestrates end-to-end testing of the complete product generation and delivery pipeline, from job submission through NASA's OPERA SDS (Science Data System) to final product delivery at NASA's CMR DAAC (Common Metadata Repository - Distributed Active Archive Center).
+This repository contains a comprehensive Verification & Validation (V&V) test automation suite for **NASA OPERA** (Observational Products for End-Users from Remote Sensing Analysis) data products. The framework orchestrates end-to-end testing of complete product generation and delivery pipelines, from job submission through NASA's OPERA SDS (Science Data System) to final product delivery at NASA's CMR DAAC (Common Metadata Repository - Distributed Active Archive Center).
+
+**Currently supported products:**
+- **DIST-S1**: Displacement products from Sentinel-1 data
 
 [OPERA Mission](https://www.jpl.nasa.gov/missions/opera) | [SLIM Best Practices](https://nasa-ammos.github.io/slim/) | [Issue Tracker](../../issues)
 
@@ -32,10 +35,11 @@ This repository contains a comprehensive test automation suite for **OPERA DIST-
 ## Contents
 
 * [Quick Start](#quick-start)
-* [Test Architecture](#test-architecture)
+* [DIST-S1 Testing](#dist-s1-testing)
+  * [Test Scenarios](#test-scenarios)
+  * [Prerequisites Workflow](#prerequisites-workflow)
+  * [Test Architecture](#test-architecture)
 * [Configuration](#configuration)
-* [Usage Examples](#usage-examples)
-* [Prerequisites Workflow](#prerequisites-workflow)
 * [Troubleshooting](#troubleshooting)
 * [Contributing](#contributing)
 * [License](#license)
@@ -43,7 +47,7 @@ This repository contains a comprehensive test automation suite for **OPERA DIST-
 
 ## Quick Start
 
-This guide provides a quick way to get started with OPERA DIST-S1 testing.
+This guide provides a quick way to get started with OPERA V&V testing.
 
 ### Requirements
 
@@ -130,6 +134,187 @@ This guide provides a quick way to get started with OPERA DIST-S1 testing.
   # Submit a job only
   just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
   ```
+
+## DIST-S1 Testing
+
+This section covers all DIST-S1 (Displacement products from Sentinel-1 data) test scenarios and workflows.
+
+### Running All Tests
+
+Run all DIST-S1 tests in sequence:
+
+```bash
+just dist-s1::all
+```
+
+This will execute:
+1. E2E test with --product-id-time (default parameters: 11SLT_0, 20250614T015042Z)
+2. Polarization switch test (20TLP_3, 20250919T102312Z)
+3. Single polarization test (51QTA_1, 20241029T100014Z)
+
+### Test Scenarios
+
+The framework includes several predefined test scenarios for different DIST-S1 processing conditions:
+
+#### 1. DIST-S1 E2E With --product-id-time
+
+The main E2E test accepts custom tile and timestamp parameters:
+
+**Default test (Tile: 11SLT_0, Timestamp: 20250614T015042Z):**
+```bash
+just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time
+```
+
+**Custom tile and timestamp:**
+```bash
+just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 11SLT_0 20250614T015042Z
+```
+
+**Arctic Alaska example (HH+HV polarization):**
+```bash
+just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 01WDU_5 20220101T051815Z
+```
+
+#### 2. Polarization Switch Test
+
+Tests DIST-S1 processing for polarization switching scenarios using track 20TLP_3:
+
+```bash
+just dist-s1::dist-s1-polarization-switch-for-a-track
+```
+
+- **Track**: 20TLP_3
+- **Timestamp**: 20250919T102312Z
+- **Scenario**: Validates polarization switching behavior
+
+#### 3. Single Polarization Test
+
+Tests DIST-S1 processing for single polarization scenarios using track 51QTA_1:
+
+```bash
+just dist-s1::dist-s1-single-polarization
+```
+
+- **Track**: 51QTA_1
+- **Timestamp**: 20241029T100014Z
+- **Scenario**: Validates single polarization processing
+
+### Utility Commands
+
+These helper commands allow you to check system state and perform individual operations:
+
+**Check current SDS product count:**
+```bash
+just dist-s1::e2e-with-product-id-time::sds-get-product-count
+```
+
+**Check current DAAC product count:**
+```bash
+just dist-s1::e2e-with-product-id-time::daac-get-product-count
+```
+
+**Submit a job without running full E2E test:**
+```bash
+just dist-s1::e2e-with-product-id-time::sds-submit-job <TILE> <TIMESTAMP>
+
+# Example:
+just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+```
+
+### Prerequisites Workflow
+
+For discovering valid test parameters and preparing test data:
+
+#### Complete Automated Workflow
+
+Run everything in one command:
+
+```bash
+just dist-s1::prerequisites::workflow <TILE> <START_DATE> <END_DATE> <OUTPUT_CSV>
+
+# Example: Survey 11SLT tile for June 2024
+just dist-s1::prerequisites::workflow 11SLT 2024-06-01T00:00:00Z 2024-06-30T23:59:59Z /tmp/rtc_test.csv
+```
+
+This will:
+1. Check tile information
+2. Survey RTC granules from CMR
+3. Trigger granules for the tile
+4. Show you the product IDs and timestamps to use
+
+#### Individual Prerequisite Commands
+
+**Check Tile Information:**
+```bash
+just dist-s1::prerequisites::check-tile 11SLT
+```
+
+**Survey RTC Granules:**
+```bash
+just dist-s1::prerequisites::survey-rtc-granules 2024-10-01T00:00:00Z 2024-10-31T23:59:59Z /tmp/rtc_oct.csv
+```
+
+Output files:
+- `/tmp/rtc_oct.csv` - Summary by time period
+- `/tmp/rtc_oct.csv.raw.csv` - Full granule list (use this for next step!)
+
+**Trigger Granules for a Tile:**
+```bash
+just dist-s1::prerequisites::trigger-granules 11SLT /tmp/rtc_oct.csv.raw.csv
+```
+
+**Important:** Use the `.raw.csv` file from the survey command!
+
+**Get Product ID from Granule:**
+```bash
+just dist-s1::prerequisites::get-product-id-from-granule OPERA_L2_RTC-S1_T066-140035-IW2_20220101T051815Z_20241216T224934Z_S1A_30_v1.0
+```
+
+### Test Architecture
+
+The DIST-S1 test framework consists of modular components:
+
+#### Structure
+
+```
+dist-s1/
+├── mod.just                                # Module index
+├── prerequisites.just                      # Helper commands
+├── e2e-with-product-id-time.just          # E2E test with --product-id-time
+├── dist-s1-polarization-switch-for-a-track.just  # Polarization switch test
+├── dist-s1-single-polarization.just       # Single polarization test
+└── sds-product-count.json                 # OpenSearch query template
+```
+
+#### Test Parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `TILE` | Product ID (tile + acquisition group) | `11SLT_0` |
+| `TIMESTAMP` | Acquisition timestamp | `20250614T015042Z` |
+
+#### Tile Naming Convention
+
+- Format: `{MGRS_TILE}_{ACQUISITION_GROUP}`
+- Example: `11SLT_0` = Tile 11SLT, acquisition group 0
+- A single MGRS tile can have multiple acquisition groups (0-3+)
+
+#### CMR Survey Parameters
+
+- `--collection-shortname`: `OPERA_L2_RTC-S1_V1`
+- `--endpoint`: `OPS` (operational) or `UAT` (test)
+- Date format: `YYYY-MM-DDTHH:MM:SSZ`
+
+#### Finding Valid Test Data
+
+**For standard VV+VH polarization:**
+- Use any mid-latitude tile (e.g., 11SLT, 20TLP)
+- Survey recent data (2024-2025)
+
+**For HH+HV polarization (non-standard):**
+- Use Arctic tiles: 01WDU, 01WCU, 60WWD
+- Use dates: 2022-01-01 to 2022-06-30
+- Antarctica tiles: dates in 2024-2025
 
 ## Test Architecture
 
