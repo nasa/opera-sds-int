@@ -42,8 +42,8 @@ e2e-with-product-id-time TILE=DEFAULT_TILE TIMESTAMP=DEFAULT_TIMESTAMP:
     echo "=== Submitting Job ==="
     just dist-s1::e2e-with-product-id-time::sds-submit-job {{TILE}} {{TIMESTAMP}}
     echo ""
-    echo "=== Waiting 15 minutes for job completion ==="
-    sleep 900
+    echo "=== Waiting 20 minutes for job completion ==="
+    sleep 1200
     echo ""
     echo "=== Latest Product RTC Inputs ==="
     just dist-s1::e2e-with-product-id-time::sds-get-latest-product-rtc-input-products
@@ -128,10 +128,15 @@ sds-get-latest-product-rtc-input-products:
         exit 1
     fi
     response=$(run_cmd curl -sk "$OPERA_SDS_BASE_URL/grq_es/grq_v0.1_l3_dist_s1-*/_search" -X POST -H 'Content-Type: application/json' --data-binary @grq-latest-dist-s1.json)
-    rtc_inputs=$(echo "$response" | jq -r '.hits.hits[0]._source.metadata.Files[0].runconfig.input_file_group.pre_rtc_copol | to_entries[] | .value')
-    echo "$rtc_inputs"
-    rtc_count=$(echo "$rtc_inputs" | wc -l)
-    echo "Total RTC input products: $rtc_count"
+    hit_count=$(echo "$response" | jq -r '.hits.total.value // .hits.total // 0')
+    if [ "$hit_count" -eq 0 ]; then  # lol the variable name
+        echo "No DIST S1 products found - job may still be processing"
+    else
+        rtc_inputs=$(echo "$response" | jq -r '.hits.hits[0]._source.metadata.Files[0].runconfig.input_file_group.pre_rtc_copol | to_entries[] | .value')
+        rtc_count=$(echo "$rtc_inputs" | wc -l)
+        echo -e "{{DEBUG_COLOR}}$rtc_inputs{{RESET_COLOR}}"
+        echo "Total RTC input products: $rtc_count"
+    fi
 
 # Get latest DIST S1 product's S3 URL list from OPERA SDS mozart
 sds-get-latest-product-s3-product-urls:
@@ -155,10 +160,15 @@ sds-get-latest-product-s3-product-urls:
         exit 1
     fi
     response=$(run_cmd curl -sk "$OPERA_SDS_BASE_URL/grq_es/grq_v0.1_l3_dist_s1-*/_search" -X POST -H 'Content-Type: application/json' --data-binary @grq-latest-dist-s1.json)
-    product_urls=$(echo "$response" | jq -r '.hits.hits[0]._source.metadata.product_urls[]')
-    echo "$product_urls"
-    url_count=$(echo "$product_urls" | wc -l)
-    echo "Total product URLs: $url_count"
+    hit_count=$(echo "$response" | jq -r '.hits.total.value // .hits.total // 0')
+    if [ "$hit_count" -eq 0 ]; then
+        echo "No DIST S1 products found - job may still be processing"
+    else
+        product_urls=$(echo "$response" | jq -r '.hits.hits[0]._source.metadata.product_urls[]')
+        url_count=$(echo "$product_urls" | wc -l)
+        echo -e "{{DEBUG_COLOR}}$product_urls{{RESET_COLOR}}"
+        echo "Total product URLs: $url_count"
+    fi
 
 # Get the count of DIST S1 products on OPERA SDS mozart
 sds-get-product-count:
