@@ -99,41 +99,14 @@ This guide provides a quick way to get started with OPERA V&V testing.
 
 ### Run Instructions
 
-1. **Run the default E2E test**:
-   ```bash
-   just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time
-   ```
+**Run all tests**:
+```bash
+just all
+```
 
-2. **Monitor test progress** (test takes ~15 minutes):
-   - Initial product counts from SDS and DAAC
-   - Job submission confirmation
-   - 15-minute wait period for job completion
-   - Final product counts and validation
-   - Success/failure reporting with deltas
+This executes all test suites in the framework. Currently runs all DIST-S1 test scenarios in sequence. Each test takes approximately 15 minutes to complete.
 
-### Usage Examples
-
-* **Default test scenario** (Tile: 11SLT_0, Timestamp: 20250614T015042Z):
-  ```bash
-  just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time
-  ```
-
-* **Custom tile and timestamp**:
-  ```bash
-  just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 01WDU_5 20220101T051815Z
-  ```
-
-* **Individual test components**:
-  ```bash
-  # Check current SDS product count
-  just dist-s1::e2e-with-product-id-time::sds-get-product-count
-
-  # Check current DAAC product count
-  just dist-s1::e2e-with-product-id-time::daac-get-product-count
-
-  # Submit a job only
-  just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
-  ```
+For detailed information on individual test scenarios, custom parameters, and utility commands, see the [DIST-S1 Testing](#dist-s1-testing) section below.
 
 ## DIST-S1 Testing
 
