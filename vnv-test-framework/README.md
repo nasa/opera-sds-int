@@ -122,8 +122,9 @@ just dist-s1::all
 
 This will execute:
 1. E2E test with --product-id-time (default parameters: 11SLT_0, 20250614T015042Z)
-2. Polarization switch test (20TLP_3, 20250919T102312Z)
-3. Single polarization test (51QTA_1, 20241029T100014Z)
+2. Single polarization test (51QTA_1, 20241029T100014Z)
+3. Polarization switch test (20TLP_3, 20250919T102312Z)
+4. Historical processing test (date range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z)
 
 ### Test Scenarios
 
@@ -171,6 +172,18 @@ just dist-s1::dist-s1-single-polarization
 - **Track**: 51QTA_1
 - **Timestamp**: 20241029T100014Z
 - **Scenario**: Validates single polarization processing
+
+#### 4. DIST-S1 E2E Historical Processing
+
+Tests DIST-S1 historical processing using date range queries:
+
+```bash
+just dist-s1::e2e-hist
+```
+
+- **Date Range**: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z
+- **Expected Products**: 582
+- **Scenario**: Validates historical processing with date range parameters
 
 ### Utility Commands
 
