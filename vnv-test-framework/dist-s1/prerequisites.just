@@ -14,21 +14,34 @@
 survey-rtc-granules START_DATE END_DATE OUTPUT_FILE:
     #!/usr/bin/env bash
     set -e
+
+    # Capture start time
+    START_TIME=$(date +%s)
+    START_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+
+    # Helper function to print timestamp
+    timestamp() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+
     echo "==================================================================="
     echo "Surveying RTC-S1 Granules from CMR"
     echo "==================================================================="
+    echo "Started: $START_TIME_HUMAN"
     echo "Start Date: {{START_DATE}}"
     echo "End Date: {{END_DATE}}"
     echo "Output File: {{OUTPUT_FILE}}"
     echo "==================================================================="
     echo ""
 
+    timestamp "Starting CMR survey..."
     if daac_data_subscriber.py survey \
         --collection-shortname=OPERA_L2_RTC-S1_V1 \
         --endpoint=OPS \
         --start-date={{START_DATE}} \
         --end-date={{END_DATE}} \
         --out-csv={{OUTPUT_FILE}}; then
+        timestamp "Survey completed successfully"
         echo ""
         echo "✅ Survey completed successfully"
         echo ""
@@ -39,9 +52,28 @@ survey-rtc-granules START_DATE END_DATE OUTPUT_FILE:
         echo "To view granule count:"
         echo "  wc -l {{OUTPUT_FILE}}.raw.csv"
     else
+        timestamp "Survey failed"
         echo "❌ Survey failed"
         exit 1
     fi
+
+    # Calculate duration
+    END_TIME=$(date +%s)
+    END_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+    DURATION=$((END_TIME - START_TIME))
+    HOURS=$((DURATION / 3600))
+    MINUTES=$(((DURATION % 3600) / 60))
+    SECONDS=$((DURATION % 60))
+    DURATION_HUMAN=$(printf '%02d:%02d:%02d' $HOURS $MINUTES $SECONDS)
+
+    echo ""
+    echo "==================================================================="
+    echo "EXECUTION SUMMARY"
+    echo "==================================================================="
+    echo "Started:  $START_TIME_HUMAN"
+    echo "Ended:    $END_TIME_HUMAN"
+    echo "Duration: $DURATION_HUMAN (${DURATION}s)"
+    echo "==================================================================="
 
 # Trigger granules for a specific tile from survey results
 #
@@ -57,13 +89,25 @@ survey-rtc-granules START_DATE END_DATE OUTPUT_FILE:
 trigger-granules TILE_ID RAW_CSV_FILE:
     #!/usr/bin/env bash
     set -e
+
+    # Capture start time
+    START_TIME=$(date +%s)
+    START_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+
+    # Helper function to print timestamp
+    timestamp() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+
     echo "==================================================================="
     echo "Triggering Granules for Tile {{TILE_ID}}"
     echo "==================================================================="
+    echo "Started: $START_TIME_HUMAN"
     echo "Input File: {{RAW_CSV_FILE}}"
     echo "==================================================================="
     echo ""
 
+    timestamp "Checking input file..."
     if [ ! -f "{{RAW_CSV_FILE}}" ]; then
         echo "❌ ERROR: File not found: {{RAW_CSV_FILE}}"
         echo ""
@@ -71,10 +115,11 @@ trigger-granules TILE_ID RAW_CSV_FILE:
         exit 1
     fi
 
-    echo "Running dist_s1_burst_db_tool.py..."
+    timestamp "Running dist_s1_burst_db_tool.py..."
     echo ""
 
     if dist_s1_burst_db_tool.py trigger_granules {{RAW_CSV_FILE}} --tile-to-trigger={{TILE_ID}}; then
+        timestamp "Trigger analysis completed"
         echo ""
         echo "✅ Trigger analysis completed"
         echo ""
@@ -84,9 +129,28 @@ trigger-granules TILE_ID RAW_CSV_FILE:
         echo "Use the product_id and timestamp for your test:"
         echo "  just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time <PRODUCT_ID> <TIMESTAMP>"
     else
+        timestamp "Trigger analysis failed"
         echo "❌ Trigger analysis failed"
         exit 1
     fi
+
+    # Calculate duration
+    END_TIME=$(date +%s)
+    END_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+    DURATION=$((END_TIME - START_TIME))
+    HOURS=$((DURATION / 3600))
+    MINUTES=$(((DURATION % 3600) / 60))
+    SECONDS=$((DURATION % 60))
+    DURATION_HUMAN=$(printf '%02d:%02d:%02d' $HOURS $MINUTES $SECONDS)
+
+    echo ""
+    echo "==================================================================="
+    echo "EXECUTION SUMMARY"
+    echo "==================================================================="
+    echo "Started:  $START_TIME_HUMAN"
+    echo "Ended:    $END_TIME_HUMAN"
+    echo "Duration: $DURATION_HUMAN (${DURATION}s)"
+    echo "==================================================================="
 
 # Check what acquisition groups exist for a tile
 #
@@ -99,15 +163,30 @@ trigger-granules TILE_ID RAW_CSV_FILE:
 #
 check-tile TILE_ID:
     #!/usr/bin/env bash
+
+    # Capture start time
+    START_TIME=$(date +%s)
+    START_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+
+    # Helper function to print timestamp
+    timestamp() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+
     echo "==================================================================="
     echo "Checking Tile: {{TILE_ID}}"
     echo "==================================================================="
+    echo "Started: $START_TIME_HUMAN"
+    echo "==================================================================="
     echo ""
 
+    timestamp "Querying tile information..."
     if dist_s1_burst_db_tool.py tile_id {{TILE_ID}}; then
+        timestamp "Tile information retrieved successfully"
         echo ""
         echo "✅ Tile information retrieved"
     else
+        timestamp "Failed to get tile information"
         echo "❌ Failed to get tile information"
         echo ""
         echo "Possible reasons:"
@@ -115,6 +194,24 @@ check-tile TILE_ID:
         echo "  - Typo in tile ID"
         exit 1
     fi
+
+    # Calculate duration
+    END_TIME=$(date +%s)
+    END_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+    DURATION=$((END_TIME - START_TIME))
+    HOURS=$((DURATION / 3600))
+    MINUTES=$(((DURATION % 3600) / 60))
+    SECONDS=$((DURATION % 60))
+    DURATION_HUMAN=$(printf '%02d:%02d:%02d' $HOURS $MINUTES $SECONDS)
+
+    echo ""
+    echo "==================================================================="
+    echo "EXECUTION SUMMARY"
+    echo "==================================================================="
+    echo "Started:  $START_TIME_HUMAN"
+    echo "Ended:    $END_TIME_HUMAN"
+    echo "Duration: $DURATION_HUMAN (${DURATION}s)"
+    echo "==================================================================="
 
 # Get product-id-time from a specific RTC granule ID
 #
@@ -126,23 +223,55 @@ check-tile TILE_ID:
 #
 get-product-id-from-granule GRANULE_ID:
     #!/usr/bin/env bash
+
+    # Capture start time
+    START_TIME=$(date +%s)
+    START_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+
+    # Helper function to print timestamp
+    timestamp() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+
     echo "==================================================================="
     echo "Getting Product ID from Granule"
     echo "==================================================================="
+    echo "Started: $START_TIME_HUMAN"
     echo "Granule ID: {{GRANULE_ID}}"
     echo "==================================================================="
     echo ""
 
+    timestamp "Querying granule information..."
     if dist_s1_burst_db_tool.py native_id {{GRANULE_ID}}; then
+        timestamp "Product ID information retrieved successfully"
         echo ""
         echo "✅ Product ID information retrieved"
         echo ""
         echo "Look for lines starting with '--product-id-time:' above"
         echo "Use those values for your test"
     else
+        timestamp "Failed to get product ID"
         echo "❌ Failed to get product ID"
         exit 1
     fi
+
+    # Calculate duration
+    END_TIME=$(date +%s)
+    END_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+    DURATION=$((END_TIME - START_TIME))
+    HOURS=$((DURATION / 3600))
+    MINUTES=$(((DURATION % 3600) / 60))
+    SECONDS=$((DURATION % 60))
+    DURATION_HUMAN=$(printf '%02d:%02d:%02d' $HOURS $MINUTES $SECONDS)
+
+    echo ""
+    echo "==================================================================="
+    echo "EXECUTION SUMMARY"
+    echo "==================================================================="
+    echo "Started:  $START_TIME_HUMAN"
+    echo "Ended:    $END_TIME_HUMAN"
+    echo "Duration: $DURATION_HUMAN (${DURATION}s)"
+    echo "==================================================================="
 
 # Complete workflow: Survey → Find tile products → Show test commands
 #
@@ -156,25 +285,48 @@ get-product-id-from-granule GRANULE_ID:
 workflow TILE_ID START_DATE END_DATE OUTPUT_FILE:
     #!/usr/bin/env bash
     set -e
+
+    # Capture start time
+    START_TIME=$(date +%s)
+    START_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+
+    # Helper function to print timestamp
+    timestamp() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+
     echo "==================================================================="
     echo "DIST-S1 Test Prerequisites Workflow"
     echo "==================================================================="
+    echo "Started: $START_TIME_HUMAN"
     echo "Tile: {{TILE_ID}}"
     echo "Date Range: {{START_DATE}} to {{END_DATE}}"
     echo "==================================================================="
     echo ""
 
-    echo "Step 1: Checking tile information..."
+    timestamp "Step 1: Checking tile information..."
     just dist-s1::prerequisites::check-tile {{TILE_ID}}
+    timestamp "Step 1 completed"
     echo ""
 
-    echo "Step 2: Surveying RTC granules..."
+    timestamp "Step 2: Surveying RTC granules..."
     just dist-s1::prerequisites::survey-rtc-granules {{START_DATE}} {{END_DATE}} {{OUTPUT_FILE}}
+    timestamp "Step 2 completed"
     echo ""
 
-    echo "Step 3: Triggering granules for tile {{TILE_ID}}..."
+    timestamp "Step 3: Triggering granules for tile {{TILE_ID}}..."
     just dist-s1::prerequisites::trigger-granules {{TILE_ID}} {{OUTPUT_FILE}}.raw.csv
+    timestamp "Step 3 completed"
     echo ""
+
+    # Calculate duration
+    END_TIME=$(date +%s)
+    END_TIME_HUMAN=$(date '+%Y-%m-%d %H:%M:%S %Z')
+    DURATION=$((END_TIME - START_TIME))
+    HOURS=$((DURATION / 3600))
+    MINUTES=$(((DURATION % 3600) / 60))
+    SECONDS=$((DURATION % 60))
+    DURATION_HUMAN=$(printf '%02d:%02d:%02d' $HOURS $MINUTES $SECONDS)
 
     echo "==================================================================="
     echo "✅ Workflow completed!"
@@ -186,3 +338,10 @@ workflow TILE_ID START_DATE END_DATE OUTPUT_FILE:
     echo "  3. Run your test:"
     echo "     just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time <PRODUCT_ID> <TIMESTAMP>"
     echo ""
+    echo "==================================================================="
+    echo "EXECUTION SUMMARY"
+    echo "==================================================================="
+    echo "Started:  $START_TIME_HUMAN"
+    echo "Ended:    $END_TIME_HUMAN"
+    echo "Duration: $DURATION_HUMAN (${DURATION}s)"
+    echo "==================================================================="
