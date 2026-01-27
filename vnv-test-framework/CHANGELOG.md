@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-01-27
+
+### Added
+
+- Dry run mode (`DRY_RUN=true`) to preview commands without executing them
+- Test name announcements at start of each test
+- 💻 emoji prefix for Just informational messages
+- Dry run documentation in README
+
+### Changed
+
+- Simplified all Just scripts, reducing code size by ~50%
+- Refactored commands to use variables, eliminating parameter duplication
+- Made error messages more concise and actionable
+- Improved test output readability
+
+### Removed
+
+- Banner separators, color variables, and verbose comments
+- `run_cmd()` wrapper functions and output filters
+- Time duration annotations from sleep messages
+
 ## [1.1.0] - 2025-11-24
 
 ### Added
