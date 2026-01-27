@@ -1,4 +1,7 @@
 mod dist-s1
 
 # Run all tests
-all: dist-s1::all
+all:
+    #!/usr/bin/env bash
+    export DRY_RUN="${DRY_RUN:-false}"
+    just dist-s1::all

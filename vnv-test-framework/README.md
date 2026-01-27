@@ -106,6 +106,17 @@ just all
 
 This executes all test suites in the framework. Currently runs all DIST-S1 test scenarios in sequence. Each test takes approximately 15 minutes to complete.
 
+**Preview commands without executing (dry run mode)**:
+```bash
+DRY_RUN=true just all
+```
+
+Dry run mode displays all commands that would be executed without actually running them. This is useful for:
+- Validating test configuration before execution
+- Reviewing commands and parameters
+- Debugging test workflows
+- Understanding what a test will do
+
 For detailed information on individual test scenarios, custom parameters, and utility commands, see the [DIST-S1 Testing](#dist-s1-testing) section below.
 
 ## DIST-S1 Testing
@@ -125,6 +136,14 @@ This will execute:
 2. Single polarization test (51QTA_1, 20241029T100014Z)
 3. Polarization switch test (20TLP_3, 20250919T102312Z)
 4. Historical processing test (date range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z)
+
+**Preview all test commands (dry run)**:
+
+```bash
+DRY_RUN=true just dist-s1::all
+```
+
+Dry run mode shows exactly what commands would be executed without running them. All commands are displayed with their full parameters, making it easy to verify configuration and understand the test workflow.
 
 ### Test Scenarios
 
@@ -147,6 +166,11 @@ just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 11SLT_0 2025061
 **Arctic Alaska example (HH+HV polarization):**
 ```bash
 just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 01WDU_5 20220101T051815Z
+```
+
+**Preview test commands (dry run):**
+```bash
+DRY_RUN=true just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 11SLT_0 20250614T015042Z
 ```
 
 #### 2. Polarization Switch Test
@@ -205,6 +229,15 @@ just dist-s1::e2e-with-product-id-time::sds-submit-job <TILE> <TIMESTAMP>
 
 # Example:
 just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+```
+
+**All utility commands support dry run mode:**
+```bash
+# Preview job submission command
+DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+
+# Preview product count query
+DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-get-product-count
 ```
 
 ### Prerequisites Workflow
@@ -431,8 +464,33 @@ just dist-s1::prerequisites::get-product-id-from-granule <GRANULE_ID>
    - Verify CMR DAAC access and collection ID
    - Confirm `NASA_CMR_BASE_URL` and `OPERA_COLLECTION_ID` are correct
 
-### Debug Mode
-Enable debug output by modifying the curl commands in test files to include response logging.
+### Dry Run Mode
+
+Preview commands without executing them using dry run mode:
+
+```bash
+# Preview any test
+DRY_RUN=true just dist-s1::all
+DRY_RUN=true just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 11SLT_0 20250614T015042Z
+DRY_RUN=true just dist-s1::prerequisites::check-tile 11SLT
+
+# Preview utility commands
+DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+```
+
+**Dry run mode features:**
+- Shows all commands that would be executed with full parameters
+- Skips environment variable validation (useful for reviewing commands without credentials)
+- Displays sleep durations instead of actually sleeping
+- No external API calls or system modifications
+- Cascades through all test levels automatically
+
+**When to use dry run:**
+- Before running tests in production
+- To validate configuration and parameters
+- To understand test workflow and command structure
+- For documentation and training purposes
+- When debugging test issues
 
 ## Contributing
 
