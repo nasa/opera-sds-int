@@ -135,7 +135,8 @@ This will execute:
 1. E2E test with --product-id-time (default parameters: 11SLT_0, 20250614T015042Z)
 2. Single polarization test (51QTA_1, 20241029T100014Z)
 3. Polarization switch test (20TLP_3, 20250919T102312Z)
-4. Historical processing test (date range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z)
+4. Anti-meridian edge test case
+5. Historical processing test (date range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z)
 
 **Preview all test commands (dry run)**:
 
@@ -197,7 +198,23 @@ just dist-s1::dist-s1-single-polarization
 - **Timestamp**: 20241029T100014Z
 - **Scenario**: Validates single polarization processing
 
-#### 4. DIST-S1 E2E Historical Processing
+#### 4. Anti-Meridian Edge Test
+
+Tests DIST-S1 processing for anti-meridian edge case scenarios:
+
+```bash
+just dist-s1::dist-s1-anti-meridian
+```
+
+- **Scenario**: Validates DIST-S1 processing for tiles crossing the anti-meridian (180° longitude)
+- **Features**: Executes DAAC data subscriber commands in batches with user-controlled pauses between batches
+
+**Preview test commands (dry run):**
+```bash
+DRY_RUN=true just dist-s1::dist-s1-anti-meridian
+```
+
+#### 5. DIST-S1 E2E Historical Processing
 
 Tests DIST-S1 historical processing using date range queries:
 
