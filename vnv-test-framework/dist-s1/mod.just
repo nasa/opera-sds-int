@@ -1,9 +1,11 @@
+mod helpers
 mod prerequisites
 mod e2e-with-product-id-time
 mod dist-s1-polarization-switch-for-a-track
 mod dist-s1-single-polarization
 mod dist-s1-anti-meridian
 mod e2e-hist
+mod dist-job-status-check
 
 # Run all DIST-S1 tests
 all:

@@ -1,0 +1,29 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "tags.keyword": "dist_s1*"
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "SINCE_TIME_PLACEHOLDER"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "size": 1000,
+  "sort": [
+    {
+      "@timestamp": {
+        "order": "desc"
+      }
+    }
+  ],
+  "_source": ["job_id", "status", "@timestamp", "tags"]
+}

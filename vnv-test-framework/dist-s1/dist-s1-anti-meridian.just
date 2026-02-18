@@ -8,8 +8,8 @@ dist-s1-anti-meridian:
     echo "💻 Running test: DIST-S1 Anti-Meridian Test"
 
     # Get initial product counts
-    just dist-s1::e2e-with-product-id-time::sds-get-product-count
-    just dist-s1::e2e-with-product-id-time::daac-get-product-count
+    just dist-s1::helpers::sds-get-product-count
+    just dist-s1::helpers::daac-get-product-count
 
     # Function to run a batch of commands
     run_batch() {
@@ -46,5 +46,5 @@ dist-s1-anti-meridian:
         # "daac_data_subscriber.py query --collection-shortname=OPERA_L2_RTC-S1_V1 --product=DIST_S1 --endpoint=OPS ..."
 
     # Get final product counts
-    just dist-s1::e2e-with-product-id-time::sds-get-product-count
-    just dist-s1::e2e-with-product-id-time::daac-get-product-count
+    just dist-s1::helpers::sds-get-product-count
+    just dist-s1::helpers::daac-get-product-count

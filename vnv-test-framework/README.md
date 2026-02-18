@@ -232,12 +232,22 @@ These helper commands allow you to check system state and perform individual ope
 
 **Check current SDS product count:**
 ```bash
-just dist-s1::e2e-with-product-id-time::sds-get-product-count
+just dist-s1::helpers::sds-get-product-count
 ```
 
 **Check current DAAC product count:**
 ```bash
-just dist-s1::e2e-with-product-id-time::daac-get-product-count
+just dist-s1::helpers::daac-get-product-count
+```
+
+**Get latest product's RTC input products:**
+```bash
+just dist-s1::helpers::sds-get-latest-product-rtc-input-products
+```
+
+**Get latest product's S3 URLs:**
+```bash
+just dist-s1::helpers::sds-get-latest-product-s3-product-urls
 ```
 
 **Submit a job without running full E2E test:**
@@ -253,8 +263,9 @@ just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
 # Preview job submission command
 DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
 
-# Preview product count query
-DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-get-product-count
+# Preview product count queries
+DRY_RUN=true just dist-s1::helpers::sds-get-product-count
+DRY_RUN=true just dist-s1::helpers::daac-get-product-count
 ```
 
 ### Prerequisites Workflow
@@ -315,11 +326,17 @@ The DIST-S1 test framework consists of modular components:
 ```
 dist-s1/
 ├── mod.just                                # Module index
-├── prerequisites.just                      # Helper commands
+├── helpers.just                            # Common helper functions
+├── prerequisites.just                      # Test preparation helpers
 ├── e2e-with-product-id-time.just          # E2E test with --product-id-time
+├── e2e-hist.just                          # Historical processing test
 ├── dist-s1-polarization-switch-for-a-track.just  # Polarization switch test
 ├── dist-s1-single-polarization.just       # Single polarization test
-└── sds-product-count.json                 # OpenSearch query template
+├── dist-s1-anti-meridian.just             # Anti-meridian edge test
+├── dist-job-status-check.just             # Job status monitoring
+├── sds-product-count.json                 # OpenSearch query template
+├── grq-latest-dist-s1.json                # Query for latest product
+└── job-status-query-template.json         # Job status query template
 ```
 
 #### Test Parameters
@@ -359,9 +376,14 @@ The test framework consists of modular components:
 ### Core Files
 - **`justfile`**: Main entry point and module loader
 - **`dist-s1/mod.just`**: Module index loading submodules
+- **`dist-s1/helpers.just`**: Common helper functions (product counts, metadata queries)
 - **`dist-s1/e2e-with-product-id-time.just`**: Main E2E test orchestration
+- **`dist-s1/e2e-hist.just`**: Historical processing test with date ranges
+- **`dist-s1/dist-job-status-check.just`**: Job status monitoring utilities
 - **`dist-s1/prerequisites.just`**: Test preparation helpers
 - **`dist-s1/sds-product-count.json`**: OpenSearch query for SDS product counts
+- **`dist-s1/grq-latest-dist-s1.json`**: Query template for latest product details
+- **`dist-s1/job-status-query-template.json`**: Query template for job status checks
 
 ### Test Workflow
 1. **Initial State Capture**: Record baseline product counts
@@ -493,6 +515,7 @@ DRY_RUN=true just dist-s1::prerequisites::check-tile 11SLT
 
 # Preview utility commands
 DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+DRY_RUN=true just dist-s1::helpers::sds-get-product-count
 ```
 
 **Dry run mode features:**

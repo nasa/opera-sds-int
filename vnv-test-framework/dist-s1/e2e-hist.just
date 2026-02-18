@@ -10,8 +10,8 @@ e2e-hist:
     export DRY_RUN="${DRY_RUN:-false}"
     echo "💻 Running test: DIST-S1 E2E Historical Processing Test"
     echo "💻 Date Range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z (Expected: {{EXPECTED_PRODUCT_COUNT}} products)"
-    just dist-s1::e2e-with-product-id-time::daac-get-product-count
-    just dist-s1::e2e-with-product-id-time::sds-get-product-count
+    just dist-s1::helpers::daac-get-product-count
+    just dist-s1::helpers::sds-get-product-count
     just dist-s1::e2e-hist::sds-submit-hist-job
     sleep_seconds=43200
     if [ "$DRY_RUN" = "true" ]; then
@@ -19,18 +19,18 @@ e2e-hist:
     else
         sleep $sleep_seconds
     fi
-    just dist-s1::e2e-with-product-id-time::sds-get-latest-product-rtc-input-products
-    just dist-s1::e2e-with-product-id-time::sds-get-latest-product-s3-product-urls
-    just dist-s1::e2e-with-product-id-time::sds-get-product-count
-    just dist-s1::e2e-with-product-id-time::daac-get-product-count
+    just dist-s1::helpers::sds-get-latest-product-rtc-input-products
+    just dist-s1::helpers::sds-get-latest-product-s3-product-urls
+    just dist-s1::helpers::sds-get-product-count
+    just dist-s1::helpers::daac-get-product-count
     if [ "$DRY_RUN" = "false" ]; then
-        daac_output_before=$(just dist-s1::e2e-with-product-id-time::daac-get-product-count 2>&1)
+        daac_output_before=$(just dist-s1::helpers::daac-get-product-count 2>&1)
         daac_count_before=$(echo "$daac_output_before" | awk '{print $1}')
-        sds_output_before=$(just dist-s1::e2e-with-product-id-time::sds-get-product-count 2>&1)
+        sds_output_before=$(just dist-s1::helpers::sds-get-product-count 2>&1)
         sds_count_before=$(echo "$sds_output_before" | awk '{print $1}')
-        sds_output_after=$(just dist-s1::e2e-with-product-id-time::sds-get-product-count 2>&1)
+        sds_output_after=$(just dist-s1::helpers::sds-get-product-count 2>&1)
         sds_count_after=$(echo "$sds_output_after" | awk '{print $1}')
-        daac_output_after=$(just dist-s1::e2e-with-product-id-time::daac-get-product-count 2>&1)
+        daac_output_after=$(just dist-s1::helpers::daac-get-product-count 2>&1)
         daac_count_after=$(echo "$daac_output_after" | awk '{print $1}')
         sds_delta=$((sds_count_after - sds_count_before))
         daac_delta=$((daac_count_after - daac_count_before))
