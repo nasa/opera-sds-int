@@ -252,16 +252,16 @@ just dist-s1::helpers::sds-get-latest-product-s3-product-urls
 
 **Submit a job without running full E2E test:**
 ```bash
-just dist-s1::e2e-with-product-id-time::sds-submit-job <TILE> <TIMESTAMP>
+just dist-s1::e2e-with-product-id-time <TILE> <TIMESTAMP>
 
 # Example:
-just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+just dist-s1::e2e-with-product-id-time 11SLT_0 20250614T015042Z
 ```
 
 **All utility commands support dry run mode:**
 ```bash
 # Preview job submission command
-DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+DRY_RUN=true just dist-s1::e2e-with-product-id-time 11SLT_0 20250614T015042Z
 
 # Preview product count queries
 DRY_RUN=true just dist-s1::helpers::sds-get-product-count
@@ -514,7 +514,7 @@ DRY_RUN=true just dist-s1::e2e-with-product-id-time::e2e-with-product-id-time 11
 DRY_RUN=true just dist-s1::prerequisites::check-tile 11SLT
 
 # Preview utility commands
-DRY_RUN=true just dist-s1::e2e-with-product-id-time::sds-submit-job 11SLT_0 20250614T015042Z
+DRY_RUN=true just dist-s1::e2e-with-product-id-time 11SLT_0 20250614T015042Z
 DRY_RUN=true just dist-s1::helpers::sds-get-product-count
 ```
 
