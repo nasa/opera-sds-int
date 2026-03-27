@@ -137,6 +137,7 @@ This will execute:
 3. Polarization switch test (20TLP_3, 20250919T102312Z)
 4. Anti-meridian edge test case
 5. Historical processing test (date range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z)
+6. EC2 worker node destruction test (job recovery validation)
 
 **Preview all test commands (dry run)**:
 
@@ -225,6 +226,38 @@ just dist-s1::e2e-hist
 - **Date Range**: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z
 - **Expected Products**: 582
 - **Scenario**: Validates historical processing with date range parameters
+
+#### 6. EC2 Worker Node Destruction Test
+
+Tests job recovery after terminating an EC2 worker node. This is an interactive test that enables forward processing, terminates a worker instance, and verifies that jobs recover automatically.
+
+```bash
+just dist-s1::dist-s1-ec2-destruction::ec2-destruction-test
+```
+
+**With a custom working directory for test artifacts:**
+```bash
+just dist-s1::dist-s1-ec2-destruction::ec2-destruction-test /tmp/my-test-run
+```
+
+**Preview test commands (dry run):**
+```bash
+DRY_RUN=true just dist-s1::dist-s1-ec2-destruction::ec2-destruction-test
+```
+
+- **Default Work Directory**: `/tmp/ec2-destruction-test`
+- **Scenario**: Enables forward processing, terminates a worker node, monitors job recovery, generates a test report, then disables forward processing
+- **Interactive**: Prompts for the EC2 instance ID to terminate and optional ASG capacity restore
+
+The following environment variables can be overridden:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ASG_NAME` | Auto-scaling group name | `opera-int-fwd-opera-job_worker-sciflo-l3_dist_s1` |
+| `EVENTBRIDGE_RULE` | EventBridge rule name | `opera-int-fwd-rtc_for_dist-query-timer-Trigger` |
+| `REGION` | AWS region | `us-west-2` |
+| `OPERA_SDS_BASE_URL` | Base URL for OPERA SDS Mozart | `https://opera-int-mozart-fwd.jpl.nasa.gov` |
+| `RECOVERY_WAIT_SECONDS` | Seconds to wait for job recovery | `300` |
 
 ### Utility Commands
 
@@ -334,6 +367,8 @@ dist-s1/
 ├── dist-s1-single-polarization.just       # Single polarization test
 ├── dist-s1-anti-meridian.just             # Anti-meridian edge test
 ├── dist-job-status-check.just             # Job status monitoring
+├── dist-s1-ec2-destruction.just           # EC2 worker node destruction test
+├── ec2-destruction-test.sh                # EC2 destruction test script
 ├── sds-product-count.json                 # OpenSearch query template
 ├── grq-latest-dist-s1.json                # Query for latest product
 └── job-status-query-template.json         # Job status query template
