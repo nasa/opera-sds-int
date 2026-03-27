@@ -7,6 +7,7 @@ mod dist-s1-anti-meridian
 mod e2e-hist-small
 mod e2e-hist
 mod dist-job-status-check
+mod dist-s1-ec2-destruction
 
 # Run all DIST-S1 tests
 all:
@@ -20,4 +21,5 @@ all:
     just dist-s1::dist-s1-anti-meridian
     just dist-s1::e2e-hist-small
     just dist-s1::e2e-hist
+    just dist-s1::dist-s1-ec2-destruction::ec2-destruction-test
     echo "💻 All DIST-S1 tests completed."
