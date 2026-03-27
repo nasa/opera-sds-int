@@ -11,8 +11,12 @@ e2e-with-product-id-time TILE=DEFAULT_TILE TIMESTAMP=DEFAULT_TIMESTAMP:
     export DRY_RUN="${DRY_RUN:-false}"
     echo "💻 Running test: DIST-S1 E2E Test with --product-id-time"
     echo "💻 Product ID: {{TILE}}, Timestamp: {{TIMESTAMP}}"
-    just dist-s1::helpers::daac-get-product-count
-    just dist-s1::helpers::sds-get-product-count
+    sds_output_before=$(just dist-s1::helpers::sds-get-product-count 2>&1)
+    echo "$sds_output_before"
+    sds_count_before=$(echo "$sds_output_before" | awk '{print $1}')
+    daac_output_before=$(just dist-s1::helpers::daac-get-product-count 2>&1)
+    echo "$daac_output_before"
+    daac_count_before=$(echo "$daac_output_before" | awk '{print $1}')
     just dist-s1::e2e-with-product-id-time::sds-submit-job {{TILE}} {{TIMESTAMP}}
     sleep_seconds=1800
     if [ "$DRY_RUN" = "true" ]; then
@@ -22,17 +26,13 @@ e2e-with-product-id-time TILE=DEFAULT_TILE TIMESTAMP=DEFAULT_TIMESTAMP:
     fi
     just dist-s1::helpers::sds-get-latest-product-rtc-input-products
     just dist-s1::helpers::sds-get-latest-product-s3-product-urls
-    just dist-s1::helpers::sds-get-product-count
-    just dist-s1::helpers::daac-get-product-count
+    sds_output_after=$(just dist-s1::helpers::sds-get-product-count 2>&1)
+    echo "$sds_output_after"
+    sds_count_after=$(echo "$sds_output_after" | awk '{print $1}')
+    daac_output_after=$(just dist-s1::helpers::daac-get-product-count 2>&1)
+    echo "$daac_output_after"
+    daac_count_after=$(echo "$daac_output_after" | awk '{print $1}')
     if [ "$DRY_RUN" = "false" ]; then
-        daac_output_before=$(just dist-s1::helpers::daac-get-product-count 2>&1)
-        daac_count_before=$(echo "$daac_output_before" | awk '{print $1}')
-        sds_output_before=$(just dist-s1::helpers::sds-get-product-count 2>&1)
-        sds_count_before=$(echo "$sds_output_before" | awk '{print $1}')
-        sds_output_after=$(just dist-s1::helpers::sds-get-product-count 2>&1)
-        sds_count_after=$(echo "$sds_output_after" | awk '{print $1}')
-        daac_output_after=$(just dist-s1::helpers::daac-get-product-count 2>&1)
-        daac_count_after=$(echo "$daac_output_after" | awk '{print $1}')
         if [ "$sds_count_before" = "$sds_count_after" ]; then
             echo "❌ No products were generated on SDS (count unchanged: $sds_count_before)"
             exit 1

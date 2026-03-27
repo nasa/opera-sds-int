@@ -10,8 +10,12 @@ e2e-hist-small:
     export DRY_RUN="${DRY_RUN:-false}"
     echo "💻 Running test: DIST-S1 E2E Historical Processing Test"
     echo "💻 Date Range: 2024-07-10T02:00:00Z to 2024-07-10T02:22:22Z (Expected: {{EXPECTED_PRODUCT_COUNT}} products)"
-    just dist-s1::helpers::daac-get-product-count
-    just dist-s1::helpers::sds-get-product-count
+    sds_output_before=$(just dist-s1::helpers::sds-get-product-count 2>&1)
+    echo "$sds_output_before"
+    sds_count_before=$(echo "$sds_output_before" | awk '{print $1}')
+    daac_output_before=$(just dist-s1::helpers::daac-get-product-count 2>&1)
+    echo "$daac_output_before"
+    daac_count_before=$(echo "$daac_output_before" | awk '{print $1}')
     just dist-s1::e2e-hist-small::sds-submit-hist-job
     sleep_seconds=43200
     if [ "$DRY_RUN" = "true" ]; then
@@ -21,17 +25,13 @@ e2e-hist-small:
     fi
     just dist-s1::helpers::sds-get-latest-product-rtc-input-products
     just dist-s1::helpers::sds-get-latest-product-s3-product-urls
-    just dist-s1::helpers::sds-get-product-count
-    just dist-s1::helpers::daac-get-product-count
+    sds_output_after=$(just dist-s1::helpers::sds-get-product-count 2>&1)
+    echo "$sds_output_after"
+    sds_count_after=$(echo "$sds_output_after" | awk '{print $1}')
+    daac_output_after=$(just dist-s1::helpers::daac-get-product-count 2>&1)
+    echo "$daac_output_after"
+    daac_count_after=$(echo "$daac_output_after" | awk '{print $1}')
     if [ "$DRY_RUN" = "false" ]; then
-        daac_output_before=$(just dist-s1::helpers::daac-get-product-count 2>&1)
-        daac_count_before=$(echo "$daac_output_before" | awk '{print $1}')
-        sds_output_before=$(just dist-s1::helpers::sds-get-product-count 2>&1)
-        sds_count_before=$(echo "$sds_output_before" | awk '{print $1}')
-        sds_output_after=$(just dist-s1::helpers::sds-get-product-count 2>&1)
-        sds_count_after=$(echo "$sds_output_after" | awk '{print $1}')
-        daac_output_after=$(just dist-s1::helpers::daac-get-product-count 2>&1)
-        daac_count_after=$(echo "$daac_output_after" | awk '{print $1}')
         sds_delta=$((sds_count_after - sds_count_before))
         daac_delta=$((daac_count_after - daac_count_before))
         if [ "$sds_count_before" = "$sds_count_after" ]; then
