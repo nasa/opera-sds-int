@@ -137,7 +137,8 @@ This will execute:
 3. Polarization switch test (20TLP_3, 20250919T102312Z)
 4. Anti-meridian edge test case
 5. Historical processing test (date range: 2025-07-10T02:00:00Z to 2025-07-10T07:00:00Z)
-6. EC2 worker node destruction test (job recovery validation)
+6. Forward processing E2E test (EventBridge trigger, 3-hour wait, product verification)
+7. EC2 worker node destruction test (job recovery validation)
 
 **Preview all test commands (dry run)**:
 
@@ -227,7 +228,37 @@ just dist-s1::e2e-hist
 - **Expected Products**: 582
 - **Scenario**: Validates historical processing with date range parameters
 
-#### 6. EC2 Worker Node Destruction Test
+#### 6. Forward Processing E2E Test
+
+Tests the DIST-S1 forward processing pipeline end-to-end. Enables the EventBridge forward processing trigger, waits for jobs to process, then verifies that no jobs failed and new products were created on both SDS and CMR.
+
+```bash
+just dist-s1::e2e-fwd
+```
+
+**With a custom wait time (e.g. 30 minutes instead of 3 hours):**
+```bash
+FWD_WAIT_SECONDS=1800 just dist-s1::e2e-fwd
+```
+
+**Preview test commands (dry run):**
+```bash
+DRY_RUN=true just dist-s1::e2e-fwd
+```
+
+- **Default Wait Time**: 3 hours (10800 seconds)
+- **Scenario**: Captures baseline SDS/CMR product counts, enables EventBridge trigger, waits for forward processing to run, disables trigger, checks job statuses, compares product counts
+- **Pass Criteria**: No failed jobs AND product counts increased on both SDS and CMR
+
+The following environment variables can be overridden:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EVENTBRIDGE_RULE` | EventBridge rule name for forward processing trigger | `opera-int-fwd-rtc_for_dist-query-timer-Trigger` |
+| `REGION` | AWS region | `us-west-2` |
+| `FWD_WAIT_SECONDS` | Seconds to wait for forward processing | `10800` (3 hours) |
+
+#### 7. EC2 Worker Node Destruction Test
 
 Tests job recovery after terminating an EC2 worker node. This is an interactive test that enables forward processing, terminates a worker instance, and verifies that jobs recover automatically.
 
@@ -362,6 +393,7 @@ dist-s1/
 ├── helpers.just                            # Common helper functions
 ├── prerequisites.just                      # Test preparation helpers
 ├── e2e-with-product-id-time.just          # E2E test with --product-id-time
+├── e2e-fwd.just                           # Forward processing E2E test
 ├── e2e-hist.just                          # Historical processing test
 ├── dist-s1-polarization-switch-for-a-track.just  # Polarization switch test
 ├── dist-s1-single-polarization.just       # Single polarization test
