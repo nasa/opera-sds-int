@@ -6,6 +6,7 @@ mod dist-s1-single-polarization
 mod dist-s1-anti-meridian
 mod e2e-hist-small
 mod e2e-hist
+mod e2e-hist-date-range
 mod dist-job-status-check
 mod e2e-fwd
 mod dist-s1-ec2-destruction

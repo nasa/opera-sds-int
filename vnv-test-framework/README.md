@@ -228,6 +228,37 @@ just dist-s1::e2e-hist
 - **Expected Products**: 582
 - **Scenario**: Validates historical processing with date range parameters
 
+#### 5a. DIST-S1 E2E Historical Processing (Parameterized)
+
+A parameterized version of the historical processing test that accepts custom date ranges, expected product counts, and sleep durations. This test is designed to be reusable — the other historical tests (`e2e-hist`, `e2e-hist-small`) can be rewritten as thin wrappers around it.
+
+**Default test (2026-01-01 full-day range):**
+```bash
+just dist-s1::e2e-hist-date-range::e2e-hist-date-range
+```
+
+**Custom date range and expected count:**
+```bash
+just dist-s1::e2e-hist-date-range::e2e-hist-date-range 2025-07-10T02:00:00Z 2025-07-10T07:00:00Z 582 43200
+```
+
+**Equivalent to e2e-hist-small:**
+```bash
+just dist-s1::e2e-hist-date-range::e2e-hist-date-range 2024-07-10T02:00:00Z 2024-07-10T02:22:22Z 20 43200
+```
+
+**Preview test commands (dry run):**
+```bash
+DRY_RUN=true just dist-s1::e2e-hist-date-range::e2e-hist-date-range
+```
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `START_DATE` | Start of the date range (ISO 8601) | `2026-01-01T00:00:00Z` |
+| `END_DATE` | End of the date range (ISO 8601) | `2026-01-01T23:59:59Z` |
+| `EXPECTED_PRODUCT_COUNT` | Expected number of new products | `10` |
+| `SLEEP_SECONDS` | Seconds to wait for processing | `43200` (12 hours) |
+
 #### 6. Forward Processing E2E Test
 
 Tests the DIST-S1 forward processing pipeline end-to-end. Enables the EventBridge forward processing trigger, waits for jobs to process, then verifies that no jobs failed and new products were created on both SDS and CMR.
@@ -395,6 +426,7 @@ dist-s1/
 ├── e2e-with-product-id-time.just          # E2E test with --product-id-time
 ├── e2e-fwd.just                           # Forward processing E2E test
 ├── e2e-hist.just                          # Historical processing test
+├── e2e-hist-date-range.just               # Parameterized historical processing test
 ├── dist-s1-polarization-switch-for-a-track.just  # Polarization switch test
 ├── dist-s1-single-polarization.just       # Single polarization test
 ├── dist-s1-anti-meridian.just             # Anti-meridian edge test
